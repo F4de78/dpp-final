@@ -3,7 +3,7 @@ import pandas as pd
 from itertools import combinations
 
 class Anonymization_hkp:
-    def __init__(self,_data,_sensitive,_h,_k,_p):
+    def __init__(self,_data,_sensitive,_h,_k,_p,_l):
         self.df = _data # orignial dataframe
         self.sensitive = _sensitive # list of sensitive items
         self.public = [ item for item in self.df.columns if item not in self.sensitive ] # list of public items (data-sensitive)
@@ -11,19 +11,29 @@ class Anonymization_hkp:
         self.k = _k
         self.p = _p
 
+        self.l = _l
+
     """
     number of 1 in column (beta=1)
     """
     def sup(self,beta):
+        if len(beta) == 1:
+            return self.df[beta].sum()
         sum_ = self.df[beta].sum(axis=1)  # sum_ is a list: sum all columns to check how many rows are equal to 111...
-        return sum_.count(len(beta))
+        return sum_.value_counts()[len(beta)].item()
     
 
     def p_breach(self, beta):  # TODO: use sup() 
         occurr = []  # for each private item the number of occurrencies
         for e in self.sensitive:
-            sum_ = self.df[beta.append(e)].sum(axis=1)  # sum_ is a list: sum all columns to check how many rows are equal
-            occurr.append(sum_.count(len(beta) + 1))  # save the result
+            beta.append(e)
+            sum_ = self.df[beta].sum(axis=1)  # sum_ is a list: sum all columns to check how many rows are equal
+            s = sum_.value_counts()
+            if (len(beta)) not in s:
+                continue
+            else:
+                occurr.append(sum_.value_counts()[len(beta)])  # save the result
+        print(occurr)
         return np.max(occurr) / self.sup(beta)  # take the max result and calculate probability
                 
 
@@ -36,10 +46,13 @@ class Anonymization_hkp:
     # step 1) preprocessing: eliminate all size 1 moles
     def suppress_size1_mole(self):
         for cmole in self.public:   # candidate mole
-            s = self.sup1(cmole)
-            p_br = self.p_breach(cmole)
-            if s < self.k or p_br > self.h:  # check if cmole is a mole
-                self.df.drop(cmole)  # eliminate the mole
+            s = self.sup([cmole])
+            p_br = self.p_breach([cmole])
+            if s.item() < self.k or p_br > self.h:  # check if cmole is a mole
+                print(cmole)
+                print("----------------------")
+                self.df.drop(inplace=True,columns=cmole,axis=1)  # eliminate the mole
+                print(self.df)
 
     
     # step 2) find all size > 1 < p minimal moles
