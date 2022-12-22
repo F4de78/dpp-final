@@ -1,13 +1,13 @@
 import pandas as pd
 import Anonymization_hkp as hkp
 
-# sensitive = [0,5,9,15,30,47]
-sensitive = [7,8,9]
+sensitive = [0,5,9,15,17]
+#sensitive = [7,8]
 h = 0.3
-k = 4
-p = 4
+k = 3
+p = 3
 
-l = 5
+l = 3
 
 if __name__ == "__main__":
     # import dataset
@@ -18,7 +18,7 @@ if __name__ == "__main__":
     df.drop(df.columns[val1],inplace=True,axis=1)
     
     # add indexes
-    df.columns = [ i for i in range(len(df.columns)) ] 
+    df.columns = [ i for i in range(len(df.columns)) ]
 
     #print(df)
     anon = hkp.Anonymization_hkp(df,sensitive,h,k,p,l)

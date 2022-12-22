@@ -1,3 +1,5 @@
+
+# data of a node
 class nodeData:
     def __init__(self, label, mole_num: int, node_link):
         self.label = label
@@ -16,6 +18,7 @@ class MoleTree:
 
     # build the MoleTree
     def build_tree(self, Ms):
+        # sorting all e in Ms with respect to MM(e)
 
 
         mole_tree = MoleTree("null", 0, None)

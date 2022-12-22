@@ -83,7 +83,7 @@ class Anonymization_hkp:
                 temp = f
             else:
                 temp = set([item for t in f for item in t])  # union of groups of dimension i and then make new groups of dimension i+1
-            c = set(combinations(temp, i+1)) # candidate set C_(i+1)
+            c = set(combinations(temp, i+1)) # candidate set C_(i+1)  # TODO: fixare moli minime di dimensione > 2: non viene controllato che i sottoinsiemi non siano moli
             #temp_M = []  # not necessary: we do not keep lists of moles of size i
             temp_F = []
             for beta in c:
@@ -97,7 +97,6 @@ class Anonymization_hkp:
             #all_M.append(temp_M)
             f = set(temp_F)  # substitute F_i with F_(i+1)
             i += 1
-        print(all_M)
         return all_M # M*
 
     """
