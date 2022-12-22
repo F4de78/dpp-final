@@ -1,8 +1,8 @@
 from itertools import combinations
 
 import numpy as np
-import pandas as pd
-from treelib import Node, Tree
+#from treelib import Node, Tree
+import mole_tree
 
 
 class Anonymization_hkp:
@@ -84,19 +84,20 @@ class Anonymization_hkp:
             else:
                 temp = set([item for t in f for item in t])  # union of groups of dimension i and then make new groups of dimension i+1
             c = set(combinations(temp, i+1)) # candidate set C_(i+1)
-            print(c)
-            temp_M = []
+            #temp_M = []  # not necessary: we do not keep lists of moles of size i
             temp_F = []
             for beta in c:
                 #print("i ", i, ": ", self.sup(list(beta)))
                 #print("len di beta step 2", len(beta))
                 if self.sup(list(beta)) < self.k or self.p_breach(list(beta)) > self.h:  # beta is a mole
-                    temp_M.append(beta)  # beta is a tuple: you can do set of tuples but can not do set of lists because list is not hashable
+                    #temp_M.append(beta)  # beta is a tuple: you can do set of tuples but can not do set of lists because list is not hashable
+                    all_M.append(beta)
                 else:
                     temp_F.append(beta)  # beta is not a mole
-            all_M.append(temp_M)
+            #all_M.append(temp_M)
             f = set(temp_F)  # substitute F_i with F_(i+1)
             i += 1
+        print(all_M)
         return all_M # M*
 
     """
@@ -109,10 +110,9 @@ class Anonymization_hkp:
     def create_MM(self, Ms : list):
         for e in self.public: # iterate public items e 
             count = 0 # count occurence of e in M*
-            for mlen in Ms: # iterate list of minimal moles of size [2,p]
-                for l in mlen: # iterare minimal moles in list of size ^
-                    if e in l:                     
-                        count += 1
+            for l in Ms:
+                if e in l:
+                    count += 1
             if count != 0 : # if e is not on M*, we skip
                 self.MM[e] = count
 
@@ -121,6 +121,7 @@ class Anonymization_hkp:
     def suppress_minimal_moles(self, Ms : list):
         self.create_MM(Ms)
         print(self.MM)
+
 
     
         
