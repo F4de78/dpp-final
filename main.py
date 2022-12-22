@@ -23,8 +23,15 @@ if __name__ == "__main__":
     #print(df)
     anon = hkp.Anonymization_hkp(df,sensitive,h,k,p,l)
     # preprocessing
+    print("[*] start preprocessing")
     anon.suppress_size1_mole()
-    print("preprocessing: ended")
-    Mms = anon.find_minimal_moles()
-    print(Mms)
-    print(anon.df)
+    print("[!] end preprocessing")
+    # find minimal moles
+    print("[*] start finding minimal moles")
+    Ms = anon.find_minimal_moles()
+    print("[!] end finding minimal moles")
+    print("Minimal moles to suppress: ",Ms)
+    anon.create_MM(Ms)
+    print("MM(e): ")
+    print(anon.MM)
+

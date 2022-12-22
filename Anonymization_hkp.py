@@ -1,17 +1,25 @@
+from itertools import combinations
+
 import numpy as np
 import pandas as pd
-from itertools import combinations
+from treelib import Node, Tree
+
 
 class Anonymization_hkp:
     def __init__(self,_data,_sensitive,_h,_k,_p,_l):
+        # user input
         self.df = _data # orignial dataframe
         self.sensitive = _sensitive # list of sensitive items
         self.public = [ item for item in self.df.columns if item not in self.sensitive ] # list of public items (data-sensitive)
         self.h = _h
         self.k = _k
         self.p = _p
-
         self.l = _l
+        # aux structures
+        self.MM = {} # for each public item numbers of minimal moles in which is contained
+        # self.IL = {} useless(?), = sup(e)
+
+
 
     """
     number of 1 in column (beta=1)
@@ -20,6 +28,7 @@ class Anonymization_hkp:
         if len(beta) == 1:
             #print("beta ", beta, "sup ", self.df[beta].sum().values.item())
             return self.df[beta].sum().values.item()  # (senza .values dava una serie)
+        #print("bet in sup: ", beta, " type: ", type(beta))
         sum_ = self.df[beta].sum(axis=1)  # sum_ is a list: sum all columns to check how many rows are equal to 111...
         #print("sum_", sum_)
         s = sum_.value_counts()
@@ -65,13 +74,17 @@ class Anonymization_hkp:
 
     
     # step 2) find all size > 1 < p minimal moles
-    def find_minimal_moles(self):
+    def find_minimal_moles(self): # TODO da fare con hash map?
         all_M = []
         i = 1
         f = set(self.public)  # after preprocessing we have f = F1 (set)
         while i < self.l and f:  # f not empty
-            temp = set.union(f)  # union of groups of dimension i and then make new groups of dimension i+1
+            if i == 1:
+                temp = f
+            else:
+                temp = set([item for t in f for item in t])  # union of groups of dimension i and then make new groups of dimension i+1
             c = set(combinations(temp, i+1)) # candidate set C_(i+1)
+            print(c)
             temp_M = []
             temp_F = []
             for beta in c:
@@ -84,7 +97,30 @@ class Anonymization_hkp:
             all_M.append(temp_M)
             f = set(temp_F)  # substitute F_i with F_(i+1)
             i += 1
-        return all_M
+        return all_M # M*
+
+    """
+    example:
+    M* = [[(1,2),(2,3)],[(4,5,6])]]
+            ^^^^^^^^^^   ^^^^^^^
+            set of len(mm)=2   set of len(mm)=3 ecc...
+    """
+
+    def create_MM(self, Ms : list):
+        for e in self.public: # iterate public items e 
+            count = 0 # count occurence of e in M*
+            for mlen in Ms: # iterate list of minimal moles of size [2,p]
+                for l in mlen: # iterare minimal moles in list of size ^
+                    if e in l:                     
+                        count += 1
+            if count != 0 : # if e is not on M*, we skip
+                self.MM[e] = count
+
+
+    # step 3)
+    def suppress_minimal_moles(self, Ms : list):
+        self.create_MM(Ms)
+        print(self.MM)
 
     
         
