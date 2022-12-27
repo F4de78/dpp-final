@@ -20,6 +20,26 @@ class Anonymization_hkp:
         # self.IL = {} useless(?), = sup(e)
 
 
+    """
+    remove moles contained in bigger moles, so it removes non minimal moles
+    all_M=list of "true" minimal moles
+    c=set of candidate minimal moles(candidate because maybe contains minimal moles)
+    """
+    def remove_subtuple(self,all_M:list, c:set): #check if c contains subtuple in all_M
+    # all_M -> tuple piccole - c -> grandi
+        to_remove = []
+        for m_tuple in all_M: # for all small tuples
+            for c_tuple in c: # for all big tuples
+                counter = 0
+                for t_item in m_tuple: #for all element of small tuples (all_m)
+                    if t_item in c_tuple: # if element is contained in big tuple
+                        counter += 1
+                if len(m_tuple) == counter:
+                    to_remove.append(c_tuple)
+        for r in to_remove:
+            if r in c: # there may be duplicates in to_remove
+                c.remove(r)
+
 
     """
     number of 1 in column (beta=1)
@@ -83,7 +103,9 @@ class Anonymization_hkp:
                 temp = f
             else:
                 temp = set([item for t in f for item in t])  # union of groups of dimension i and then make new groups of dimension i+1
-            c = set(combinations(temp, i+1)) # candidate set C_(i+1)  # TODO: fixare moli minime di dimensione > 2: non viene controllato che i sottoinsiemi non siano moli
+            print(all_M)
+            c = set(combinations(temp, i+1)) # candidate set C_(i+1)
+            self.remove_subtuple(all_M,c) # element in c may not be minimal moles
             #temp_M = []  # not necessary: we do not keep lists of moles of size i
             temp_F = []
             for beta in c:
@@ -105,7 +127,6 @@ class Anonymization_hkp:
             ^^^^^^^^^^   ^^^^^^^
             set of len(mm)=2   set of len(mm)=3 ecc...
     """
-
     def create_MM(self, Ms : list):
         for e in self.public: # iterate public items e 
             count = 0 # count occurence of e in M*
