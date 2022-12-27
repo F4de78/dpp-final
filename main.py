@@ -30,8 +30,9 @@ if __name__ == "__main__":
     print("[*] start finding minimal moles")
     Ms = anon.find_minimal_moles()
     print("[!] end finding minimal moles")
-    print("Minimal moles to suppress: ",Ms)
-    anon.create_MM(Ms)
-    print("MM(e): ")
-    print(anon.MM)
+    #print("Minimal moles to suppress: ",Ms)
+    anon.suppress_minimal_moles(Ms)
+    #print("MM(e): ")
+    #print(anon.MM)
+
 

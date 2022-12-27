@@ -1,4 +1,5 @@
 from itertools import combinations
+import mole_tree
 
 import numpy as np
 #from treelib import Node, Tree
@@ -140,7 +141,10 @@ class Anonymization_hkp:
     # step 3)
     def suppress_minimal_moles(self, Ms : list):
         self.create_MM(Ms)
-        print(self.MM)
+        print("MM: ", self.MM)
+        tree = mole_tree.MoleTree()
+        tree.build_tree(Ms, self.MM)
+
 
 
     
