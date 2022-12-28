@@ -104,7 +104,6 @@ class Anonymization_hkp:
                 temp = f
             else:
                 temp = set([item for t in f for item in t])  # union of groups of dimension i and then make new groups of dimension i+1
-            print(all_M)
             c = set(combinations(temp, i+1)) # candidate set C_(i+1)
             self.remove_subtuple(all_M,c) # element in c may not be minimal moles
             #temp_M = []  # not necessary: we do not keep lists of moles of size i
@@ -142,9 +141,12 @@ class Anonymization_hkp:
     def suppress_minimal_moles(self, Ms : list):
         self.create_MM(Ms)
         print("MM: ", self.MM)
+        # sorting all e in Ms with respect to MM(e)
+        Ms = mole_tree.sort_tuple(Ms, self.MM)
+        print("sorted Ms: ", Ms)
         # create mole tree
-        tree = mole_tree.MoleTree("null", 0, None)  # root
-        tree.build_tree(Ms, self.MM)
+        tree = mole_tree.MoleTree(0, Ms, "null", 0, None)  # root
+        tree.build_tree(self.MM)
 
 
 
