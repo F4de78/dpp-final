@@ -18,7 +18,7 @@ class Anonymization_hkp:
         self.l = _l
         # aux structures
         self.MM = {} # for each public item numbers of minimal moles in which is contained
-        # self.IL = {} useless(?), = sup(e)
+        self.IL = {} # sup(e)
 
 
     """
@@ -136,10 +136,16 @@ class Anonymization_hkp:
             if count != 0 : # if e is not on M*, we skip
                 self.MM[e] = count
 
+    def create_IL(self):
+        for e in self.public: # iterate public items e 
+            self.IL[e] = self.sup([e])
+
 
     # step 3)
     def suppress_minimal_moles(self, Ms : list):
         self.create_MM(Ms)
+        self.create_IL()
+        print("IL ",self.IL)
         print("MM: ", self.MM)
         # sorting all e in Ms with respect to MM(e)
         Ms = mole_tree.sort_tuple(Ms, self.MM)
@@ -147,6 +153,7 @@ class Anonymization_hkp:
         # create mole tree
         tree = mole_tree.MoleTree(0, Ms, "null", 0, None)  # root
         tree.build_tree(self.MM)
+        tree.build_score_table(self.MM,self.IL)
 
 
 
