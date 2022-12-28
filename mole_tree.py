@@ -11,18 +11,14 @@ def sort_tuple(Ms, MM):
         Ms_sorted.append(tuple(mole_dict.keys()))
     return Ms_sorted
 
-# data of a node
-class NodeData:
-    def __init__(self, label, mole_num: int, node_link):
-        self.label = label
-        self. mole_num = mole_num
-        self.node_link = node_link
 
 
 class MoleTree:
     def __init__(self, label, mole_num: int, node_link):
         self.children = []
-        self.data = NodeData(label, mole_num, node_link)
+        self.label = label
+        self.mole_num = mole_num
+        self.node_link = node_link
 
 
     # add child to node
@@ -35,8 +31,10 @@ class MoleTree:
         Ms = sort_tuple(Ms, MM)
 
         # building tree
-        m_tree = MoleTree("null", 0, None)  # root TODO: spostare la root in Anonymization
-        max_level =  max(len(mole) for mole in Ms) # is equivalent to the max len for tuples in Ms
-        print(max_level)
-        #for level in range(1, max_level)
+        max_level = max(len(mole) for mole in Ms) # is equivalent to the max len for tuples in Ms
+        for level in range(0, max_level-1):
+            for mole in Ms:
+                # build the node for the element
+
+
 

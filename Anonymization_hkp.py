@@ -142,7 +142,8 @@ class Anonymization_hkp:
     def suppress_minimal_moles(self, Ms : list):
         self.create_MM(Ms)
         print("MM: ", self.MM)
-        tree = mole_tree.MoleTree()
+        # create mole tree
+        tree = mole_tree.MoleTree("null", 0, None)  # root
         tree.build_tree(Ms, self.MM)
 
 
