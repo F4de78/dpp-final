@@ -153,9 +153,16 @@ class Anonymization_hkp:
         # create mole tree
         tree = mole_tree.MoleTree(0, Ms, "null", 0, None)  # root
         tree.build_tree(self.MM)
-        tree.build_score_table(self.MM,self.IL)
-
-
-
+        tree.print_tree()
+        # create score table
+        #score_table = tree.build_score_table(self.MM,self.IL)
+        #print("ancestors: ",score_table[7].node_link[3].get_ancestors()[0].label)
+        supp_item = tree.suppress_moles(self.MM,self.IL)
+        tree.print_tree()
+        # brutally add node (debug)
+        #n = mole_tree.MoleTree(3, Ms, "figlio", -1, tree.children[0].children[0])  # root
+        #tree.children[0].children[0].children.append(n)
+        print(supp_item)
+        
     
         
