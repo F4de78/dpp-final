@@ -1,7 +1,7 @@
 import pandas as pd
 import Anonymization_hkp as hkp
 
-sensitive = [0,5,9,15,17]
+sensitive = [0,5,9,15,17,18,19,20,21,22,23]
 #sensitive = [7,8]
 h = 0.3
 k = 3
@@ -14,8 +14,8 @@ if __name__ == "__main__":
     filename = "datasets/dataBMS1_transaction.csv"
     #filename = "datasets/test.csv"
     df = pd.read_csv(filename)
-    val1 = [i for i in range(20,df.shape[1])]
-    df.drop(df.columns[val1],inplace=True,axis=1)
+    #val1 = [i for i in range(20,df.shape[1])]
+    #df.drop(df.columns[val1],inplace=True,axis=1)
     
     # add indexes
     df.columns = [ i for i in range(len(df.columns)) ]
@@ -31,7 +31,9 @@ if __name__ == "__main__":
     Ms = anon.find_minimal_moles()
     print("[!] end finding minimal moles")
     #print("Minimal moles to suppress: ",Ms)
+    print("[*] start suppressing mole")
     anon.suppress_minimal_moles(Ms)
+    print("[!] end suppressing mole")
     #print("MM(e): ")
     #print(anon.MM)
 
