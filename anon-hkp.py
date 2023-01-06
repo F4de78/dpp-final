@@ -9,7 +9,7 @@ import numpy as np
 import mole_tree
 
 
-class Anonymization_hkp:
+class anon_hkp:
     def __init__(self,_data,_sensitive,_h,_k,_p,_l):
         # user input
         self.df = _data # orignial dataframe
@@ -61,7 +61,7 @@ class Anonymization_hkp:
         return s[len(beta)].item()
     
 
-    def p_breach(self, beta):  # TODO: use sup() 
+    def p_breach(self, beta):
         prob = []  # for each private/sensitive item the probability in beta (# occurr/sup(temp)
         for e in self.sensitive:
             tmp = beta.copy()
@@ -160,7 +160,7 @@ class Anonymization_hkp:
         tree = mole_tree.MoleTree(0, Ms, "null", 0, None)  # root
         tree.build_tree(self.MM)
         logging.debug("initial mole tree: ")
-        tree.print_tree()  # TODO: stampare albero con logging
+        #tree.print_tree()  # TODO: stampare albero con logging
         supp_item = tree.suppress_moles(self.MM, self.IL)
         logging.debug("supp_item: "+str(supp_item))
 
@@ -170,30 +170,31 @@ class Anonymization_hkp:
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--debug", help="print debug info", action='store_true')
-    parser.add_argument("--h", type=float, default=0.3)
-    parser.add_argument("--k", type=int, default=3)
-    parser.add_argument("--p", type=int, default=3)
-    parser.add_argument("--l", type=int, default=3)
+    parser.add_argument("-d","--debug", help="print debug info", action='store_true')
+    parser.add_argument("-H", type=float, default=0.3,help="")
+    parser.add_argument("-K", type=int, default=3,help="like k-anonymity")
+    parser.add_argument("-P", type=int, default=3,help="power of the attacker")
+    parser.add_argument("-L", type=int, default=3,help="early stop(?)")
     parser.add_argument('-s', '--sensitive', nargs='+', help='List of sensitive items',
                         default=[0, 5, 9, 15, 17, 18, 19])
-    parser.add_argument("--df", help="Dataset to anonymize", default="datasets/dataBMS1_transaction.csv")
+    parser.add_argument("-df", help="Dataset to anonymize", default="datasets/dataBMS1_transaction.csv")
     args = parser.parse_args()
 
     if args.debug:
-        logging.basicConfig(format='%(asctime)s %(message)s', stream=sys.stderr, level=logging.DEBUG)
+
+        logging.basicConfig(format='[\x1b[31;1m%(levelname)s\033[0m] %(asctime)s.%(msecs)03d \t %(message)s',datefmt='%H:%M:%S', stream=sys.stderr, level=logging.DEBUG)
     else:
-        logging.basicConfig(format='%(asctime)s %(message)s', stream=sys.stderr, level=logging.INFO)
+        
+        logging.basicConfig(format='[\x1b[31;1m%(levelname)s\033[0m] %(asctime)s.%(msecs)03d \t %(message)s',datefmt='%H:%M:%S', stream=sys.stderr, level=logging.INFO)
 
     # import dataset
     # filename = "datasets/dataBMS1_transaction.csv"
     # filename = "datasets/test.csv"
     filename = args.df
-    h = args.h
-    k = args.k
-    p = args.p
-    l = args.l
-
+    h = args.H
+    k = args.K
+    p = args.P
+    l = args.L
     df = pd.read_csv(filename)
     val1 = [i for i in range(20, df.shape[1])]
     df.drop(df.columns[val1], inplace=True, axis=1)
@@ -201,7 +202,7 @@ def main():
     df.columns = [i for i in range(len(df.columns))]
 
     sensitive = args.sensitive
-    anon = Anonymization_hkp(df, sensitive, h, k, p, l)
+    anon = anon_hkp(df, sensitive, h, k, p, l)
 
     # preprocessing
     logging.info("start preprocessing")

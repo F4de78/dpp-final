@@ -83,7 +83,7 @@ class MoleTree:
             l = []
             self.build_link(label,l)
             score_table[label] = ScoreList(MM[label],IL[label],l)
-
+        #TODO: da stamapre con logging
         #print("score table: ")
         #print("label MM IL link")
         #for label,score in score_table.items():
@@ -109,19 +109,21 @@ class MoleTree:
 
     def suppress_moles(self,MM,IL):
         score_table = self.build_score_table(MM,IL)
-        print("initial score table:")
-        for label,score in score_table.items():
-            print(label, " ", score.MM, " " ,score.IL, " ", [i.label for i in score.node_link])
+        #TODO: da stamapre con logging
+        #print("initial score table:")
+        #for label,score in score_table.items():
+        #    print(label, " ", score.MM, " " ,score.IL, " ", [i.label for i in score.node_link])
         supp_item = set()
         keys = list(score_table)
         while keys:  # while score table is not empty
-            print("keys",keys)
+            #print("keys",keys)
             score = []
             for _,e in score_table.items():
                 score.append(e.MM/e.IL) # compute all MM/IL for all label
             #k = list(score_table.keys())
             e = keys[score.index(max(score))]
-            print("To delete: ", e)
+            #TODO: da stamapre con logging
+            #print("To delete: ", e)
             supp_item.add(e) # select the label with the max value of MM/IL
             for link in score_table[e].node_link:
                 link.remove_subtree(link.label,score_table)
@@ -133,6 +135,7 @@ class MoleTree:
                 if score_table[k].MM == 0:
                     _ = score_table.pop(k)
                     keys.remove(k)
+            #TODO: da stamapre con logging
             #print("-------------------")
             #print("tree:")        
             #self.print_tree()

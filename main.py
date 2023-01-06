@@ -1,5 +1,5 @@
 import pandas as pd
-import Anonymization_hkp as hkp
+import anon_hkp as hkp
 import logging, sys  # print debug and info
 import argparse
 
@@ -36,7 +36,7 @@ if __name__ == "__main__":
     df.columns = [ i for i in range(len(df.columns)) ]
 
     sensitive = args.sensitive
-    anon = hkp.Anonymization_hkp(df,sensitive,h,k,p,l)
+    anon = hkp.anon_hkp(df,sensitive,h,k,p,l)
 
     # preprocessing
     logging.info("start preprocessing")
