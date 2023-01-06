@@ -155,5 +155,8 @@ class Anonymization_hkp:
         tree.build_tree(self.MM)
         supp_item = tree.suppress_moles(self.MM,self.IL)
         print("supp_item: ",supp_item)
+
+        self.df.drop(inplace=True, columns=list(supp_item), axis=1)  # eliminate the items
+        return supp_item  # deleted items
     
         
