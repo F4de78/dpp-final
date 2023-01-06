@@ -51,7 +51,7 @@ class MoleTree:
                     for mtuple in self.Ms:
                         if mtuple[self.level] == new_label:
                             new_Ms.append(mtuple)
-                    print("child label: ", new_label, ", level ", self.level, " child Ms list ", new_Ms)
+                    #print("child label: ", new_label, ", level ", self.level, " child Ms list ", new_Ms)
                     # create child node
                     new_child = MoleTree(self.level+1, new_Ms, new_label, 1, self)
                     self.children.append(new_child)
@@ -91,14 +91,14 @@ class MoleTree:
         return score_table
 
     # remove the subtree having 'self' as root, the root and his link in score table
-    def remove_subtree(self,root, score_table):
+    def remove_subtree(self, root, score_table):
         if self.label != root:
             score_table[self.label].node_link.remove(self) # remove from score table links
         for child in self.children:
             child.remove_subtree(root,score_table) #recursively remove subtree 
         self.children.clear() # remove all children from self
         if self.label == root:
-            # we dont need to update the children of root, because at this point they don't exists anymore
+            # we don't need to update the children of root, because at this point they don't exists anymore
             for ancestor in self.get_ancestors(): # update ancestors of root
                 ancestor.mole_num -= self.mole_num
                 score_table[ancestor.label].MM -= self.mole_num
@@ -109,7 +109,7 @@ class MoleTree:
 
     def suppress_moles(self,MM,IL):
         score_table = self.build_score_table(MM,IL)
-        print("init score table:")  
+        print("initial score table:")
         for label,score in score_table.items():
             print(label, " ", score.MM, " " ,score.IL, " ", [i.label for i in score.node_link])
         supp_item = set()
@@ -140,66 +140,3 @@ class MoleTree:
             #for label,score in score_table.items():
             #    print(label, " ", score.MM, " " ,score.IL, " ", [i.label for i in score.node_link])
         return supp_item
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    #def suppress_moles(self,MM,IL):
-    #    score_table = self.build_score_table(MM,IL)
-    #    supp_item = set()
-    #    keys = list(score_table)
-    #    while keys:  # while score table is not empty
-    #        print("keys",keys)
-    #        score = []
-    #        for _,e in score_table.items():
-    #            score.append(e.MM/e.IL) # compute all MM/IL for all label
-    #        #k = list(score_table.keys())
-    #        e = keys[score.index(max(score))]
-    #        print("To delete: ", e)
-    #        supp_item.add(e) # select the label with the max value of MM/IL
-    #        score_table[e].MM = 0
-#
-    #        # update ancetors mole_number and eliminate e
-    #        aux_node_link = copy.deepcopy(score_table[e].node_link)
-    #        for i,link in enumerate(aux_node_link,0):
-    #            print("i: ",i,"link: ",link)
-    #            for label,score in score_table.items():
-    #                print(label, " ", score.MM, " " ,score.IL, " ", [i.label for i in score.node_link])
-    #            print("index: ",score_table[e].node_link[score_table[e].node_link])
-    #            
-    #            ancestors = score_table[e].node_link[].get_ancestors()
-#
-    #            print("ancestors of ", link.label,": ", [elem.label for elem in ancestors])
-    #            for ancestor in ancestors: # update the value of mole_num of the ancestors of link ...
-    #                ancestor.mole_num -= link.mole_num # ... by removing the value of link from it
-    #                print("Mole number of ancestor ", ancestor.label, ": ", ancestor.mole_num)
-    #                score_table[ancestor.label].MM -= link.mole_num
-    #                if ancestor.mole_num == 0:
-    #                   ancestor.remove_subtree(ancestor.label,score_table)
-    #            score_table[e].node_link[score_table[e].node_link.index(link)].remove_subtree(link.label,score_table)
-    #            #for ancestor in ancestors:
-    #            #    if ancestor.mole_num == 0:
-    #            #        ancestor.remove_subtree(ancestor.label,score_table)
-    #        for k in list(score_table): # check if we have MM == 0 in score table
-    #            if score_table[k].MM == 0:
-    #                #_ = score_table.pop(k)
-    #                del score_table[k]
-    #                keys.remove(k)
-    #                print("Updated tree: ")
-    #                self.print_tree()
-    #                for label,score in score_table.items():
-    #                    print(label, " ", score.MM, " " ,score.IL, " ", [i.label for i in score.node_link])
-    #    return supp_item

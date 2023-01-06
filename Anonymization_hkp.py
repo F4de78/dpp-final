@@ -1,3 +1,6 @@
+import pandas as pd
+import logging, sys  # print debug and info
+import argparse
 from itertools import combinations
 import mole_tree
 
@@ -84,14 +87,16 @@ class Anonymization_hkp:
     """
     # step 1) preprocessing: eliminate all size 1 moles
     def suppress_size1_mole(self):
+        size1_moles = []  # only for debug
         public_copy = self.public.copy()  # copy for iteration
         for cmole in public_copy:   # candidate mole
             s = self.sup([cmole])
             p_br = self.p_breach([cmole])
             if s < self.k or p_br > self.h:  # check if cmole is a mole
-                #print("----------------------")
+                size1_moles.append(cmole)
                 self.df.drop(inplace=True,columns=cmole,axis=1)  # eliminate the mole
                 self.public.remove(cmole)
+        logging.debug("Size 1 moles: " + str(size1_moles))
 
     
     # step 2) find all size > 1 < p minimal moles
@@ -119,7 +124,8 @@ class Anonymization_hkp:
             #all_M.append(temp_M)
             f = set(temp_F)  # substitute F_i with F_(i+1)
             i += 1
-        return all_M # M*
+        logging.debug("Minimal moles (Ms): "+str(all_M))
+        return all_M  # M*
 
     """
     example:
@@ -145,18 +151,74 @@ class Anonymization_hkp:
     def suppress_minimal_moles(self, Ms : list):
         self.create_MM(Ms)
         self.create_IL()
-        print("IL ",self.IL)
-        print("MM: ", self.MM)
+        logging.debug("initial IL "+str(self.IL))
+        logging.debug("initial MM: "+str(self.MM))
         # sorting all e in Ms with respect to MM(e)
         Ms = mole_tree.sort_tuple(Ms, self.MM)
-        print("sorted Ms: ", Ms)
+        logging.debug("sorted Ms: "+str(Ms))
         # create mole tree
         tree = mole_tree.MoleTree(0, Ms, "null", 0, None)  # root
         tree.build_tree(self.MM)
-        supp_item = tree.suppress_moles(self.MM,self.IL)
-        print("supp_item: ",supp_item)
+        logging.debug("initial mole tree: ")
+        tree.print_tree()  # TODO: stampare albero con logging
+        supp_item = tree.suppress_moles(self.MM, self.IL)
+        logging.debug("supp_item: "+str(supp_item))
 
         self.df.drop(inplace=True, columns=list(supp_item), axis=1)  # eliminate the items
         return supp_item  # deleted items
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--debug", help="print debug info", action='store_true')
+    parser.add_argument("--h", type=float, default=0.3)
+    parser.add_argument("--k", type=int, default=3)
+    parser.add_argument("--p", type=int, default=3)
+    parser.add_argument("--l", type=int, default=3)
+    parser.add_argument('-s', '--sensitive', nargs='+', help='List of sensitive items',
+                        default=[0, 5, 9, 15, 17, 18, 19])
+    parser.add_argument("--df", help="Dataset to anonymize", default="datasets/dataBMS1_transaction.csv")
+    args = parser.parse_args()
+
+    if args.debug:
+        logging.basicConfig(format='%(asctime)s %(message)s', stream=sys.stderr, level=logging.DEBUG)
+    else:
+        logging.basicConfig(format='%(asctime)s %(message)s', stream=sys.stderr, level=logging.INFO)
+
+    # import dataset
+    # filename = "datasets/dataBMS1_transaction.csv"
+    # filename = "datasets/test.csv"
+    filename = args.df
+    h = args.h
+    k = args.k
+    p = args.p
+    l = args.l
+
+    df = pd.read_csv(filename)
+    val1 = [i for i in range(20, df.shape[1])]
+    df.drop(df.columns[val1], inplace=True, axis=1)
+    # add indexes
+    df.columns = [i for i in range(len(df.columns))]
+
+    sensitive = args.sensitive
+    anon = Anonymization_hkp(df, sensitive, h, k, p, l)
+
+    # preprocessing
+    logging.info("start preprocessing")
+    anon.suppress_size1_mole()
+    logging.info("end preprocessing")
+    # find minimal moles
+    logging.info("start finding minimal moles")
+    Ms = anon.find_minimal_moles()
+    logging.info("end finding minimal moles")
+    # print("Minimal moles to suppress: ",Ms)
+    logging.info("start suppressing mole")
+    anon.suppress_minimal_moles(Ms)
+    logging.info("end suppressing mole")
+    # print(anon.MM)
+
+
+if __name__ == '__main__':
+    main()
     
         
