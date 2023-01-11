@@ -181,10 +181,8 @@ def main():
     args = parser.parse_args()
 
     if args.debug:
-
         logging.basicConfig(format='[\x1b[31;1m%(levelname)s\033[0m] %(asctime)s.%(msecs)03d \t %(message)s',datefmt='%H:%M:%S', stream=sys.stderr, level=logging.DEBUG)
     else:
-        
         logging.basicConfig(format='[\x1b[31;1m%(levelname)s\033[0m] %(asctime)s.%(msecs)03d \t %(message)s',datefmt='%H:%M:%S', stream=sys.stderr, level=logging.INFO)
 
     # import dataset
