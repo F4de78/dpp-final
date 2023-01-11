@@ -136,10 +136,10 @@ class MoleTree:
                     _ = score_table.pop(k)
                     keys.remove(k)
             #TODO: da stamapre con logging
-            #print("-------------------")
-            #print("tree:")        
-            #self.print_tree()
-            #print("score table:")  
-            #for label,score in score_table.items():
-            #    print(label, " ", score.MM, " " ,score.IL, " ", [i.label for i in score.node_link])
+            print("-------------------")
+            print("tree:")
+            self.print_tree()
+            print("score table:")
+            for label,score in score_table.items():
+                print(label, " ", score.MM, " ", score.IL, " ", [i.label for i in score.node_link])
         return supp_item

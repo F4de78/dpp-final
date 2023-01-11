@@ -2,10 +2,7 @@ import pandas as pd
 import logging, sys  # print debug and info
 import argparse
 from itertools import combinations
-import mole_tree
-
 import numpy as np
-#from treelib import Node, Tree
 import mole_tree
 
 
@@ -29,7 +26,7 @@ class anon_hkp:
     all_M=list of "true" minimal moles
     c=set of candidate minimal moles(candidate because maybe contains minimal moles)
     """
-    def remove_subtuple(self,all_M:list, c:set): #check if c contains subtuple in all_M
+    def remove_subtuple(self, all_M:list, c:set): #check if c contains subtuple in all_M
     # all_M -> tuple piccole - c -> grandi
         to_remove = []
         for m_tuple in all_M: # for all small tuples
@@ -160,7 +157,7 @@ class anon_hkp:
         tree = mole_tree.MoleTree(0, Ms, "null", 0, None)  # root
         tree.build_tree(self.MM)
         logging.debug("initial mole tree: ")
-        #tree.print_tree()  # TODO: stampare albero con logging
+        tree.print_tree()  # TODO: stampare albero con logging
         supp_item = tree.suppress_moles(self.MM, self.IL)
         logging.debug("supp_item: "+str(supp_item))
 
@@ -171,13 +168,14 @@ class anon_hkp:
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-d","--debug", help="print debug info", action='store_true')
-    parser.add_argument("-H", type=float, default=0.3,help="")
+    parser.add_argument("-H", type=float, default=0.5,help="")
     parser.add_argument("-K", type=int, default=3,help="like k-anonymity")
     parser.add_argument("-P", type=int, default=3,help="power of the attacker")
     parser.add_argument("-L", type=int, default=3,help="early stop(?)")
     parser.add_argument('-s', '--sensitive', nargs='+', help='List of sensitive items',
-                        default=[0, 5, 9, 15, 17, 18, 19])
-    parser.add_argument("-df", help="Dataset to anonymize", default="datasets/dataBMS1_transaction.csv")
+                        default=[3, 4])
+    parser.add_argument("-df", help="Dataset to anonymize", default="datasets/test_mole3.csv")
+    parser.add_argument("-o", "--output", help="Anonymized dataset filename", default="out/test_mole3_anonymized.csv")
     args = parser.parse_args()
 
     if args.debug:
@@ -196,12 +194,12 @@ def main():
     p = args.P
     l = args.L
     df = pd.read_csv(filename)
-    val1 = [i for i in range(20, df.shape[1])]
-    df.drop(df.columns[val1], inplace=True, axis=1)
+    #val1 = [i for i in range(20, df.shape[1])]
+    #df.drop(df.columns[val1], inplace=True, axis=1)
     # add indexes
     df.columns = [i for i in range(len(df.columns))]
 
-    sensitive = args.sensitive
+    sensitive = [int(s) for s in args.sensitive]
     anon = anon_hkp(df, sensitive, h, k, p, l)
 
     # preprocessing
@@ -216,7 +214,11 @@ def main():
     logging.info("start suppressing mole")
     anon.suppress_minimal_moles(Ms)
     logging.info("end suppressing mole")
-    # print(anon.MM)
+    anon_df = anon.df
+    print(anon_df)
+
+    # put anonimized df in a csv
+    anon_df.to_csv(args.output)
 
 
 if __name__ == '__main__':
