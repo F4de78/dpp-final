@@ -145,7 +145,7 @@ class anon_hkp:
 
 
     # step 3)
-    def suppress_minimal_moles(self, Ms : list):
+    def suppress_minimal_moles(self, Ms : list,method): # suppress with method (mm/il,mm,1/il)
         self.create_MM(Ms)
         self.create_IL()
         logging.debug("initial IL "+str(self.IL))
@@ -158,11 +158,24 @@ class anon_hkp:
         tree.build_tree(self.MM)
         logging.debug("initial mole tree: ")
         tree.print_tree()  # TODO: stampare albero con logging
-        supp_item = tree.suppress_moles(self.MM, self.IL)
+        supp_item = tree.suppress_moles(self.MM, self.IL,method)
         logging.debug("supp_item: "+str(supp_item))
-
+        sn = self.get_distorsion(supp_item)
         self.df.drop(inplace=True, columns=list(supp_item), axis=1)  # eliminate the items
-        return supp_item  # deleted items
+        return sn,supp_item  # deleted items
+    
+    def suppress_rmall(self):
+        supp_item = self.public  # we suppress all public items, so supp_item == public
+        sn = self.get_distorsion(supp_item)
+        self.df.drop(inplace=True, columns=list(supp_item), axis=1)  # eliminate the items
+        return sn,supp_item  # deleted items
+
+    def get_distorsion(self,supp_item):
+        S = sum([self.sup([i]) for i in supp_item]) # total information loss: number of '1' in the suppressed columns
+        N = sum([self.sup([i]) for i in self.df.columns]) # total information: number of '1' in all database
+        return S/N
+
+
 
 
 def main():
@@ -172,16 +185,21 @@ def main():
     parser.add_argument("-K", type=int, default=3,help="like k-anonymity")
     parser.add_argument("-P", type=int, default=3,help="power of the attacker")
     parser.add_argument("-L", type=int, default=3,help="early stop(?)")
-    parser.add_argument('-s', '--sensitive', nargs='+', help='List of sensitive items',
-                        default=[3, 4])
+    parser.add_argument('-s', '--sensitive', nargs='+', help='List of sensitive items',default=[3, 4])
+
+    parser.add_argument("-rmt", help="select the removing method",type=str,choices={"rmall", "mmil","mm","1il"},default="mmil")
     parser.add_argument("-df", help="Dataset to anonymize", default="datasets/test_mole3.csv")
     parser.add_argument("-o", "--output", help="Anonymized dataset filename", default="out/test_mole3_anonymized.csv")
+    parser.add_argument("--stat", help="save info for statistics", type=str)
+    #utility
+    parser.add_argument("--preprocess", help="create *only* the preprocessed csv", type=str)
     args = parser.parse_args()
 
     if args.debug:
         logging.basicConfig(format='[\x1b[31;1m%(levelname)s\033[0m] %(asctime)s.%(msecs)03d \t %(message)s',datefmt='%H:%M:%S', stream=sys.stderr, level=logging.DEBUG)
     else:
         logging.basicConfig(format='[\x1b[31;1m%(levelname)s\033[0m] %(asctime)s.%(msecs)03d \t %(message)s',datefmt='%H:%M:%S', stream=sys.stderr, level=logging.INFO)
+
 
     # import dataset
     # filename = "datasets/dataBMS1_transaction.csv"
@@ -200,6 +218,18 @@ def main():
     sensitive = [int(s) for s in args.sensitive]
     anon = anon_hkp(df, sensitive, h, k, p, l)
 
+    if args.preprocess: # create the preprocessed file and exit
+        logging.info("Creating the preprocessed dataset")
+        rows =  anon.df.shape[0]
+        to_remove = [i for i in anon.df.columns if anon.sup([i])/rows < 0.1]
+        print(to_remove)
+        anon.df.drop(anon.df.columns[to_remove], inplace=True, axis=0)
+        anon.df.to_csv(args.preprocess)
+        
+        logging.info("Done.")
+        exit()
+
+
     # preprocessing
     logging.info("start preprocessing")
     anon.suppress_size1_mole()
@@ -210,11 +240,27 @@ def main():
     logging.info("end finding minimal moles")
     # print("Minimal moles to suppress: ",Ms)
     logging.info("start suppressing mole")
-    anon.suppress_minimal_moles(Ms)
+
+    sn = 0
+    supp_item = []
+    if args.rmt == "mmil":
+        sn,supp_item = anon.suppress_minimal_moles(Ms,"mmil")
+    elif args.rmt == "mm":
+        sn,supp_item = anon.suppress_minimal_moles(Ms,"mm")
+    elif args.rmt == "1il":
+        sn,supp_item = anon.suppress_minimal_moles(Ms,"1il")
+    elif args.rmt == "rmall":
+        sn,supp_item = anon.suppress_rmall()
+    else:
+        raise ValueError('Suppressing method not recognised')
+
+    if args.stat:
+        f = open(args.stat, "a")
+        f.write(f"{str(sn)}\n")
+
     logging.info("end suppressing mole")
     anon_df = anon.df
     print(anon_df)
-
     # put anonimized df in a csv
     anon_df.to_csv(args.output)
 

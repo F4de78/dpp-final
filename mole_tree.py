@@ -107,7 +107,7 @@ class MoleTree:
         score_table[self.label].MM -= self.mole_num
         del self # ?
 
-    def suppress_moles(self,MM,IL):
+    def suppress_moles(self,MM,IL,method): # method param change how we select the element to remove
         score_table = self.build_score_table(MM,IL)
         #TODO: da stamapre con logging
         #print("initial score table:")
@@ -118,9 +118,18 @@ class MoleTree:
         while keys:  # while score table is not empty
             #print("keys",keys)
             score = []
-            for _,e in score_table.items():
-                score.append(e.MM/e.IL) # compute all MM/IL for all label
-            #k = list(score_table.keys())
+            if method == "mmil":
+                for _,e in score_table.items():
+                    score.append(e.MM/e.IL) # compute all MM/IL for all label
+            elif method == "mm":
+                for _,e in score_table.items():
+                    score.append(e.MM) # compute all MM for all label
+            elif method == "1il":
+                for _,e in score_table.items():
+                    score.append(1/e.IL) # compute all 1/IL for all label
+            else:
+                raise ValueError('Suppressing method not recognised')
+
             e = keys[score.index(max(score))]
             #TODO: da stamapre con logging
             #print("To delete: ", e)
