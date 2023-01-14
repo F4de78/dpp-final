@@ -4,6 +4,7 @@ import argparse
 from itertools import combinations
 import numpy as np
 import mole_tree
+import random
 
 
 class anon_hkp:
@@ -181,11 +182,12 @@ class anon_hkp:
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-d","--debug", help="print debug info", action='store_true')
-    parser.add_argument("-H", type=float, default=0.5,help="")
-    parser.add_argument("-K", type=int, default=3,help="like k-anonymity")
-    parser.add_argument("-P", type=int, default=3,help="power of the attacker")
-    parser.add_argument("-L", type=int, default=3,help="early stop(?)")
-    parser.add_argument('-s', '--sensitive', nargs='+', help='List of sensitive items',default=[3, 4])
+    parser.add_argument("-H", type=float, default=0.5, help="")
+    parser.add_argument("-K", type=int, default=3, help="like k-anonymity")
+    parser.add_argument("-P", type=int, default=3, help="power of the attacker")
+    parser.add_argument("-L", type=int, default=3, help="early stop(?)")
+    parser.add_argument('-s', '--sensitive', default=[3, 4], nargs='+', help='List of sensitive items')
+    parser.add_argument('--delta', type=int, default=0.5, help='Percentage of public items')
 
     parser.add_argument("-rmt", help="select the removing method",type=str,choices={"rmall", "mmil","mm","1il"},default="mmil")
     parser.add_argument("-df", help="Dataset to anonymize", default="datasets/test_mole3.csv")
@@ -210,30 +212,38 @@ def main():
     p = args.P
     l = args.L
     df = pd.read_csv(filename)
+    # reshape df
     #val1 = [i for i in range(20, df.shape[1])]
     #df.drop(df.columns[val1], inplace=True, axis=1)
     # add indexes
     df.columns = [i for i in range(len(df.columns))]
 
     sensitive = [int(s) for s in args.sensitive]
+    if args.delta:
+        # random sampling delta percent of public items
+        k = len(df.columns) * (100 - args.delta) // 100
+        print(k)
+        sensitive = random.sample(range(len(df.columns)), int(k))
+        
+
     anon = anon_hkp(df, sensitive, h, k, p, l)
 
     if args.preprocess: # create the preprocessed file and exit
         logging.info("Creating the preprocessed dataset")
-        rows =  anon.df.shape[0]
+        rows = anon.df.shape[0]
         to_remove = [i for i in anon.df.columns if anon.sup([i])/rows < 0.1]
         print(to_remove)
-        anon.df.drop(anon.df.columns[to_remove], inplace=True, axis=0)
-        anon.df.to_csv(args.preprocess)
+        anon.df.drop(anon.df.columns[to_remove], inplace=True, axis=1)
+        anon.df.to_csv(args.preprocess, header=False, index=False)
         
         logging.info("Done.")
         exit()
 
 
-    # preprocessing
-    logging.info("start preprocessing")
+    # suppressing size 1 moles
+    logging.info("start suppressing size 1 moles")
     anon.suppress_size1_mole()
-    logging.info("end preprocessing")
+    logging.info("end suppressing size 1 moles")
     # find minimal moles
     logging.info("start finding minimal moles")
     Ms = anon.find_minimal_moles()
