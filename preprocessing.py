@@ -3,9 +3,10 @@ from mlxtend.preprocessing import TransactionEncoder
 import numpy as np
 import pandas as pd
 
-path = "/home/chiara/Scrivania/Lezioni_ComputerScience/DP&P/dpp-final/"
-dataset = path+"datasets/connect.dat"
-dataset_name = dataset.split("/")[8].split(".")[0]
+#path = "/home/chiara/Scrivania/Lezioni_ComputerScience/DP&P/dpp-final/"
+path = "/home/f4de/uni/dpp/dpp-final/"
+dataset = path+"datasets/retail.dat"
+dataset_name = dataset.split("/")[7].split(".")[0]
 
 
 # reading .dat file
@@ -18,7 +19,7 @@ with open(dataset, 'r') as f:
 
 df = np.array(df, dtype='O')
 #df.astype(int)
-print(df)
+#print(df)
 
 te = TransactionEncoder()
 te_ary = te.fit_transform(df)
