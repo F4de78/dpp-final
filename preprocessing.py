@@ -3,8 +3,8 @@ from mlxtend.preprocessing import TransactionEncoder
 import numpy as np
 import pandas as pd
 
-#path = "/home/chiara/Scrivania/Lezioni_ComputerScience/DP&P/dpp-final/"
-path = "/home/f4de/uni/dpp/dpp-final/"
+path = "/home/chiara/Scrivania/Lezioni_ComputerScience/DP\&P/dpp-final/"
+#path = "/home/f4de/uni/dpp/dpp-final/"
 dataset = path+"datasets/retail.dat"
 dataset_name = dataset.split("/")[7].split(".")[0]
 

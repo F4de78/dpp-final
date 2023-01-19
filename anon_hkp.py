@@ -90,9 +90,9 @@ class anon_hkp:
         public_copy = self.public.copy()  # copy for iteration
         for cmole in public_copy:   # candidate mole
             s = self.sup([cmole])
-            logging.debug("sup: " + str(s))
+            #logging.debug("sup: " + str(s))
             p_br = self.p_breach([cmole])
-            logging.debug("p_br: " + str(p_br))
+            #logging.debug("p_br: " + str(p_br))
             if s < self.k or p_br > self.h:  # check if cmole is a mole
                 size1_moles.append(cmole)
                 self.df.drop(inplace=True,columns=cmole,axis=1)  # eliminate the mole
@@ -120,6 +120,7 @@ class anon_hkp:
                 #print("len di beta step 2", len(beta))
                 if self.sup(list(beta)) < self.k or self.p_breach(list(beta)) > self.h:  # beta is a mole
                     #temp_M.append(beta)  # beta is a tuple: you can do set of tuples but can not do set of lists because list is not hashable
+                    print("Found a mole: ", str(beta))
                     all_M.append(beta)
                 else:
                     temp_F.append(beta)  # beta is not a mole
@@ -162,7 +163,7 @@ class anon_hkp:
         tree = mole_tree.MoleTree(0, Ms, "null", 0, None)  # root
         tree.build_tree(self.MM)
         logging.debug("initial mole tree: ")
-        tree.print_tree()  # TODO: stampare albero con logging
+        #tree.print_tree()  # TODO: stampare albero con logging
         supp_item = tree.suppress_moles(self.MM, self.IL,method)
         logging.debug("supp_item: "+str(supp_item))
         #sn = self.get_distorsion(supp_item,size1_mole)
@@ -181,7 +182,7 @@ def get_distorsion(anon,supp_item,size1_mole):
     # we need to build stat like this because we need the original dataframe unchanged
     stat = anon_hkp(anon.start_df, anon.sensitive, anon.h, anon.k, anon.p, anon.l ) 
     print("supp_item: ",supp_item)
-    print("stat col:",stat.df.columns)
+    #print("stat col:",stat.df.columns)
     print("public: ", stat.public)
     S = sum([stat.sup([i]) for i in supp_item]) # total information loss: number of '1' in the suppressed columns
     N = sum([stat.sup([i]) for i in stat.df.columns]) # total information: number of '1' in all database
@@ -198,7 +199,7 @@ def main():
     parser.add_argument("-P", type=int, default=3, help="power of the attacker")
     parser.add_argument("-L", type=int, default=3, help="early stop(?)")
     parser.add_argument('-s', '--sensitive', default=[3, 4], nargs='+', help='List of sensitive items')
-    parser.add_argument('--delta', type=int, default=0.5, help='Percentage of public items')
+    parser.add_argument('--delta', type=int, help='Percentage of public items')
     parser.add_argument('--seed', type=int, default=420, help='Seed used for selecting private item')
 
     parser.add_argument("-rmt", help="select the removing method",type=str,choices={"rmall", "mmil","mm","1il"},default="mmil")
@@ -231,20 +232,33 @@ def main():
     df.columns = [i for i in range(len(df.columns))]
 
     sensitive = [int(s) for s in args.sensitive]
+
     if args.delta:
+        '''
         # random sampling delta percent of public items
         k = (len(df.columns) * (100 - args.delta)) // 100
         random.seed(args.seed)
         sensitive = random.sample(range(len(df.columns)), int(k))
         print("sensitive: ",sensitive)
+        '''
+        temp_anon = anon_hkp(df, df.columns, h, k, p, l)
+        temp = [i for i in df.columns if temp_anon.sup([i]) < 300]  # take only items with limited sup
+        k = (len(df.columns) * (100 - args.delta)) // 100  # number of public items
+        if len(temp) > k:
+            random.seed(args.seed)
+            sensitive = random.sample(temp, int(k))  # take k items from temp
+        else:
+            sensitive = temp  # we have enough (or less) sensitive items
 
+    print("sensitive: ", sensitive)
     anon = anon_hkp(df, sensitive, h, k, p, l)
-    print("public: ",anon.public)
+    #print("public: ",anon.public)
+    #print("sensitive sups: " + str([anon.sup([s]) for s in sensitive]))
     if args.preprocess: # create the preprocessed file and exit
         logging.info("Creating the preprocessed dataset")
         rows = anon.df.shape[0]
         to_remove = [i for i in anon.df.columns if anon.sup([i])/rows < 0.001]
-        print(to_remove)
+        #print(to_remove)
         anon.df.drop(anon.df.columns[to_remove], inplace=True, axis=1)
         anon.df.to_csv(args.preprocess, header=False, index=False)
         
