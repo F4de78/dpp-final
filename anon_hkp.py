@@ -181,9 +181,9 @@ def get_distorsion(anon,supp_item,size1_mole):
     # anon = anon_hkp(df, sensitive, h, k, p, l)
     # we need to build stat like this because we need the original dataframe unchanged
     stat = anon_hkp(anon.start_df, anon.sensitive, anon.h, anon.k, anon.p, anon.l ) 
-    print("supp_item: ",supp_item)
+    #print("supp_item: ",supp_item)
     #print("stat col:",stat.df.columns)
-    print("public: ", stat.public)
+    #print("public: ", stat.public)
     S = sum([stat.sup([i]) for i in supp_item]) # total information loss: number of '1' in the suppressed columns
     N = sum([stat.sup([i]) for i in stat.df.columns]) # total information: number of '1' in all database
     return S/N
@@ -234,12 +234,12 @@ def main():
     sensitive = [int(s) for s in args.sensitive]
 
     if args.delta:
-        '''
+        
         # random sampling delta percent of public items
         k = (len(df.columns) * (100 - args.delta)) // 100
         random.seed(args.seed)
         sensitive = random.sample(range(len(df.columns)), int(k))
-        print("sensitive: ",sensitive)
+        #print("sensitive: ",sensitive)
         '''
         temp_anon = anon_hkp(df, df.columns, h, k, p, l)
         temp = [i for i in df.columns if temp_anon.sup([i]) < 300]  # take only items with limited sup
@@ -249,8 +249,8 @@ def main():
             sensitive = random.sample(temp, int(k))  # take k items from temp
         else:
             sensitive = temp  # we have enough (or less) sensitive items
-
-    print("sensitive: ", sensitive)
+        '''
+    #print("sensitive: ", sensitive)
     anon = anon_hkp(df, sensitive, h, k, p, l)
     #print("public: ",anon.public)
     #print("sensitive sups: " + str([anon.sup([s]) for s in sensitive]))
