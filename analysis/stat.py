@@ -6,14 +6,15 @@ suppress_method = ['rmall', 'mmil',"mm","1il"]
 labels = ['RmAll','MM/IL','MM',"1/IL"]
 path = "/home/f4de/uni/dpp/dpp-final/"
 #path = "/home/chiara/Scrivania/Lezioni_ComputerScience/DP&P/dpp-final/"
-dataset = path+"datasets/synthetic/500x500/ds_x500_y500_d06.csv"
-dataset_name = dataset.split("/")[9].split(".")[0]
+#dataset = path+"datasets/synthetic/100x100/ds_x100_y100_d005.csv"
+#dataset_name = dataset.split("/")[9].split(".")[0]
 
 def run_script(args):
     os.system(f"python3 /home/f4de/uni/dpp/dpp-final/anon_hkp.py {args}")
     #os.system(f"python3 /home/chiara/Scrivania/Lezioni_ComputerScience/DP\&P/dpp-final/anon_hkp.py {args}")
 
-def stat_k(k_list):
+def stat_k(k_list,dataset):
+    dataset_name = dataset.split("/")[9].split(".")[0]
     for method in suppress_method:
         for k in k_list:
             run_script(f"-K {k} \
@@ -32,7 +33,8 @@ def stat_k(k_list):
     plt.savefig(f"img/plt_{dataset_name}_k_.pdf")
     plt.close()        
 
-def stat_p(p_list):
+def stat_p(p_list,dataset):
+    dataset_name = dataset.split("/")[9].split(".")[0]
     for method in suppress_method:
         for p in p_list:
             run_script(f"-K 10 \
@@ -51,7 +53,8 @@ def stat_p(p_list):
     plt.savefig(f"img/plt_{dataset_name}_p_.pdf")
     plt.close()    
 
-def stat_delta(delta_list):
+def stat_delta(delta_list,dataset):
+    dataset_name = dataset.split("/")[9].split(".")[0]
     for method in suppress_method:
         for delta in delta_list:
             run_script(f"-K 10 \
@@ -88,9 +91,16 @@ def graph(filename,param,param_list):
  
 
 #stat_k([50,100,200,300,400])  # connect
-stat_k([5,10,15,20,25,30])
+
 
 #stat_p([2,3,4,5,6,7])
 
 #stat_delta([30,40,50,60,70])  # connect
-stat_delta([60,70,80,90])
+
+
+d_list = ['005', '01', '015', '02', '025', '03']
+#d_list = ['015']
+for d in d_list:
+    df = path + f"datasets/synthetic/200x50/ds_x200_y50_d{d}.csv"
+    stat_k([5,10,15,20,25,30],df)
+    stat_delta([60,70,80,90],df)
