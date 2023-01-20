@@ -131,6 +131,7 @@ class MoleTree:
                 raise ValueError('Suppressing method not recognised')
 
             e = keys[score.index(max(score))]
+            print("to remove: ", e)
             #TODO: da stamapre con logging
             #print("To delete: ", e)
             supp_item.add(e) # select the label with the max value of MM/IL
@@ -142,10 +143,13 @@ class MoleTree:
             keys.remove(e)
             for k in list(score_table): # check if we have MM == 0 in score table
                 if score_table[k].MM == 0:
+                    for link in score_table[k].node_link: # remove node with MM == 0 in tree
+                        link.remove_subtree(link.label,score_table)
                     _ = score_table.pop(k)
                     keys.remove(k)
             #TODO: da stamapre con logging
             print("-------------------")
+            print("to remove: ", e)
             print("tree:")
             self.print_tree()
             print("score table:")

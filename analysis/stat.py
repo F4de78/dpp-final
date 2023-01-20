@@ -98,7 +98,8 @@ def graph(filename,param,param_list):
 #stat_delta([30,40,50,60,70])  # connect
 
 
-d_list = ['005', '01', '015', '02', '025', '03']
+#d_list = ['005', '01', '015', '02', '025', '03']
+d_list = ['015', '02', '025', '03']
 #d_list = ['015']
 for d in d_list:
     df = path + f"datasets/synthetic/200x50/ds_x200_y50_d{d}.csv"
