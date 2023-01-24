@@ -4,26 +4,27 @@ import matplotlib.pyplot as plt
 
 suppress_method = ['rmall', 'mmil',"mm","1il"]
 labels = ['RmAll','MM/IL','MM',"1/IL"]
-path = "/home/f4de/uni/dpp/dpp-final/"
+path = "/home/f4de/uni/1lm/dpp/dpp-final/"
 #path = "/home/chiara/Scrivania/Lezioni_ComputerScience/DP&P/dpp-final/"
 #dataset = path+"datasets/synthetic/100x100/ds_x100_y100_d005.csv"
 #dataset_name = dataset.split("/")[9].split(".")[0]
 
 def run_script(args):
-    os.system(f"python3 /home/f4de/uni/dpp/dpp-final/anon_hkp.py {args}")
+    os.system(f"python3 /home/f4de/uni/1lm/dpp/dpp-final/anon_hkp.py {args}")
     #os.system(f"python3 /home/chiara/Scrivania/Lezioni_ComputerScience/DP\&P/dpp-final/anon_hkp.py {args}")
 
 def stat_k(k_list,dataset):
-    dataset_name = dataset.split("/")[9].split(".")[0]
+    dataset_name = dataset.split("/")[10].split(".")[0]
     for method in suppress_method:
         for k in k_list:
             run_script(f"-K {k} \
                          -H 0.4 \
                          -P 5 \
+                         -L 5 \
                          -rmt {method} \
                          --stat '{dataset_name}_k_{method}.txt' \
                          -df '{dataset}' \
-                         --delta 90 \
+                         --delta 40 \
                          -o '/dev/null'")
         graph(f"{dataset_name}_k_{method}.txt","k",k_list)
     plt.legend(labels)     
@@ -34,16 +35,17 @@ def stat_k(k_list,dataset):
     plt.close()        
 
 def stat_p(p_list,dataset):
-    dataset_name = dataset.split("/")[9].split(".")[0]
+    dataset_name = dataset.split("/")[10].split(".")[0]
     for method in suppress_method:
         for p in p_list:
             run_script(f"-K 10 \
                         -H 0.4 \
                         -P {p} \
+                        -L {p} \
                         -rmt {method} \
                         --stat '{dataset_name}_p_{method}.txt' \
                         -df '{dataset}' \
-                        --delta 80 \
+                        --delta 40 \
                         -o '/dev/null' ")
         graph(f"{dataset_name}_p_{method}.txt","p",p_list)
     plt.legend(labels)     
@@ -54,12 +56,13 @@ def stat_p(p_list,dataset):
     plt.close()    
 
 def stat_delta(delta_list,dataset):
-    dataset_name = dataset.split("/")[9].split(".")[0]
+    dataset_name = dataset.split("/")[10].split(".")[0]
     for method in suppress_method:
         for delta in delta_list:
             run_script(f"-K 10 \
                         -H 0.4 \
                         -P 5 \
+                        -L 5 \
                         -rmt {method} \
                         --stat '{dataset_name}_delta_{method}.txt' \
                         -df '{dataset}' \
@@ -98,10 +101,11 @@ def graph(filename,param,param_list):
 #stat_delta([30,40,50,60,70])  # connect
 
 
-#d_list = ['005', '01', '015', '02', '025', '03']
-d_list = ['015', '02', '025', '03']
+d_list = ['005', '01', '015', '02', '025', '03']
+#d_list = ['015', '02', '025', '03']
 #d_list = ['015']
 for d in d_list:
     df = path + f"datasets/synthetic/200x50/ds_x200_y50_d{d}.csv"
     stat_k([5,10,15,20,25,30],df)
-    stat_delta([60,70,80,90],df)
+    stat_p([2,3,4,5,6],df)
+    stat_delta([40,50,60,70,80],df)
