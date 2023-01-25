@@ -16,20 +16,21 @@ def run_script(args):
 def stat_k(k_list,dataset):
     dataset_name = dataset.split("/")[10].split(".")[0]
     for method in suppress_method:
-        for k in k_list:
-            run_script(f"-K {k} \
-                         -H 0.4 \
-                         -P 5 \
-                         -L 5 \
-                         -rmt {method} \
-                         --stat '{dataset_name}_k_{method}.txt' \
-                         -df '{dataset}' \
-                         --delta 40 \
-                         -o '/dev/null'")
+        #for k in k_list:
+        #    run_script(f"-K {k} \
+        #                 -H 0.4 \
+        #                 -P 5 \
+        #                 -L 5 \
+        #                 -rmt {method} \
+        #                 --stat '{dataset_name}_k_{method}.txt' \
+        #                 -df '{dataset}' \
+        #                 --delta 40 \
+        #                 -o '/dev/null'")
         graph(f"{dataset_name}_k_{method}.txt","k",k_list)
     plt.legend(labels)     
     #plt.show()
-    plt.yticks([0.7,0.8,0.9,1])
+    plt.grid()
+    plt.yticks([0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1])
     plt.ylim(0,1)   
     plt.savefig(f"img/plt_{dataset_name}_k_.pdf")
     plt.close()        
@@ -37,42 +38,44 @@ def stat_k(k_list,dataset):
 def stat_p(p_list,dataset):
     dataset_name = dataset.split("/")[10].split(".")[0]
     for method in suppress_method:
-        for p in p_list:
-            run_script(f"-K 10 \
-                        -H 0.4 \
-                        -P {p} \
-                        -L {p} \
-                        -rmt {method} \
-                        --stat '{dataset_name}_p_{method}.txt' \
-                        -df '{dataset}' \
-                        --delta 40 \
-                        -o '/dev/null' ")
+        #for p in p_list:
+        #    run_script(f"-K 10 \
+        #                -H 0.4 \
+        #                -P {p} \
+        #                -L {p} \
+        #                -rmt {method} \
+        #                --stat '{dataset_name}_p_{method}.txt' \
+        #                -df '{dataset}' \
+        #                --delta 40 \
+        #                -o '/dev/null' ")
         graph(f"{dataset_name}_p_{method}.txt","p",p_list)
     plt.legend(labels)     
     #plt.show()
-    plt.yticks([0.7,0.8,0.9,1])
-    plt.ylim(0,1.1)   
+    plt.grid()
+    plt.yticks([0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1])
+    plt.ylim(0,1)   
     plt.savefig(f"img/plt_{dataset_name}_p_.pdf")
     plt.close()    
 
 def stat_delta(delta_list,dataset):
     dataset_name = dataset.split("/")[10].split(".")[0]
     for method in suppress_method:
-        for delta in delta_list:
-            run_script(f"-K 10 \
-                        -H 0.4 \
-                        -P 5 \
-                        -L 5 \
-                        -rmt {method} \
-                        --stat '{dataset_name}_delta_{method}.txt' \
-                        -df '{dataset}' \
-                        --delta {delta} \
-                        -o '/dev/null' ")
+        #for delta in delta_list:
+        #    run_script(f"-K 10 \
+        #                -H 0.4 \
+        #                -P 5 \
+        #                -L 5 \
+        #                -rmt {method} \
+        #                --stat '{dataset_name}_delta_{method}.txt' \
+        #                -df '{dataset}' \
+        #                --delta {delta} \
+        #                -o '/dev/null' ")
         graph(f"{dataset_name}_delta_{method}.txt","δ",delta_list)
     plt.legend(labels)         
     #plt.show()
+    plt.grid()
     plt.yticks([0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1])
-    plt.ylim(0.5,1)   
+    plt.ylim(0,1)   
     plt.savefig(f"img/plt_{dataset_name}_delta_.pdf")
     plt.close()    
 
@@ -105,7 +108,7 @@ d_list = ['005', '01', '015', '02', '025', '03']
 #d_list = ['015', '02', '025', '03']
 #d_list = ['015']
 for d in d_list:
-    df = path + f"datasets/synthetic/200x50/ds_x200_y50_d{d}.csv"
+    df = path + f"datasets/synthetic/10000x20/ds_x10000_y20_d{d}.csv"
     stat_k([5,10,15,20,25,30],df)
     stat_p([2,3,4,5,6],df)
     stat_delta([40,50,60,70,80],df)
