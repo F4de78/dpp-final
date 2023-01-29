@@ -13,7 +13,7 @@ class anon_hkp:
         self.df = _data # dataframe,it will be modified 
         self.start_df = _data.copy() # original dataframe kept unmodified (used for statistics)
         self.sensitive = _sensitive # list of sensitive items
-        self.public = [ item for item in self.df.columns if item not in self.sensitive ] # list of public items (data-sensitive)
+        self.public = [ item for item in self.df.columns if item not in self.sensitive ]  # list of public items (data-sensitive)
         self.h = _h
         self.k = _k
         self.p = _p
@@ -24,36 +24,33 @@ class anon_hkp:
 
 
     """
-    remove moles contained in bigger moles, so it removes non minimal moles
-    all_M=list of "true" minimal moles
-    c=set of candidate minimal moles(candidate because maybe contains minimal moles)
+    remove moles contained in bigger moles, so it removes non minimal moles 
+    all_M = list of "true" minimal moles
+    c = set of candidate minimal moles(candidate because maybe contains minimal moles)
     """
     def remove_subtuple(self, all_M:list, c:set): #check if c contains subtuple in all_M
-    # all_M -> tuple piccole - c -> grandi
         to_remove = []
-        for m_tuple in all_M: # for all small tuples
-            for c_tuple in c: # for all big tuples
+        for m_tuple in all_M:  # for all small tuples
+            for c_tuple in c:  # for all big tuples
                 counter = 0
-                for t_item in m_tuple: #for all element of small tuples (all_m)
-                    if t_item in c_tuple: # if element is contained in big tuple
+                for t_item in m_tuple:  # for all element of small tuples (all_m)
+                    if t_item in c_tuple:  # if element is contained in big tuple
                         counter += 1
                 if len(m_tuple) == counter:
                     to_remove.append(c_tuple)
         for r in to_remove:
-            if r in c: # there may be duplicates in to_remove
+            if r in c:  # there may be duplicates in to_remove
                 c.remove(r)
 
 
     """
     number of 1 in column (beta=1)
+    number of rows of a beta-cohort (beta>1)
     """
     def sup(self,beta):
         if len(beta) == 1:
-            #print("beta ", beta, "sup ", self.df[beta].sum().values.item())
-            return self.df[beta].sum().values.item()  # (senza .values dava una serie)
-        #print("bet in sup: ", beta, " type: ", type(beta))
+            return self.df[beta].sum().values.item()
         sum_ = self.df[beta].sum(axis=1)  # sum_ is a list: sum all columns to check how many rows are equal to 111...
-        #print("sum_", sum_)
         s = sum_.value_counts()
         if len(beta) not in s:
             return 0
@@ -72,17 +69,13 @@ class anon_hkp:
                 continue
             else:
                 occurr = sum_.value_counts()[len(tmp)]
-                #print("occurr ", occurr, " sup ", self.sup(beta))
                 prob.append(occurr / self.sup(beta))  # save the result
-                #print("prob ", occurr / self.sup(beta))
         return np.max(prob)  # take the max probability
-                
 
 
     """
-    If a public item is a (size-1) mole, the item will
-    not occur in any (h,k,p)-cohesion of D, thus, can be suppressed in
-    a preprocessing step.
+    If a public item is a (size-1) mole, the item will not occur in any (h,k,p)-cohesion of D, thus, 
+    can be suppressed in a preprocessing step.
     """
     # step 1) preprocessing: eliminate all size 1 moles
     def suppress_size1_mole(self):
@@ -90,9 +83,7 @@ class anon_hkp:
         public_copy = self.public.copy()  # copy for iteration
         for cmole in public_copy:   # candidate mole
             s = self.sup([cmole])
-            #logging.debug("sup: " + str(s))
             p_br = self.p_breach([cmole])
-            #logging.debug("p_br: " + str(p_br))
             if s < self.k or p_br > self.h:  # check if cmole is a mole
                 size1_moles.append(cmole)
                 self.df.drop(inplace=True,columns=cmole,axis=1)  # eliminate the mole
@@ -113,22 +104,18 @@ class anon_hkp:
                 temp = set([item for t in f for item in t])  # union of groups of dimension i and then make new groups of dimension i+1
             c = set(combinations(temp, i+1)) # candidate set C_(i+1)
             self.remove_subtuple(all_M,c) # element in c may not be minimal moles
-            #temp_M = []  # not necessary: we do not keep lists of moles of size i
             temp_F = []
             for beta in c:
-                #print("i ", i, ": ", self.sup(list(beta)))
-                #print("len di beta step 2", len(beta))
                 if self.sup(list(beta)) < self.k or self.p_breach(list(beta)) > self.h:  # beta is a mole
-                    #temp_M.append(beta)  # beta is a tuple: you can do set of tuples but can not do set of lists because list is not hashable
                     print("Found a mole: ", str(beta))
                     all_M.append(beta)
                 else:
                     temp_F.append(beta)  # beta is not a mole
-            #all_M.append(temp_M)
             f = set(temp_F)  # substitute F_i with F_(i+1)
             i += 1
         logging.debug("Minimal moles (Ms): "+str(all_M))
         return all_M  # M*
+
 
     """
     example:
@@ -137,13 +124,14 @@ class anon_hkp:
             set of len(mm)=2   set of len(mm)=3 ecc...
     """
     def create_MM(self, Ms : list):
-        for e in self.public: # iterate public items e 
-            count = 0 # count occurence of e in M*
+        for e in self.public:  # iterate public items e
+            count = 0  # count occurence of e in M*
             for l in Ms:
                 if e in l:
                     count += 1
-            if count != 0 : # if e is not on M*, we skip
+            if count != 0 :  # if e is not on M*, we skip
                 self.MM[e] = count
+
 
     def create_IL(self):
         for e in self.public: # iterate public items e 
@@ -151,7 +139,7 @@ class anon_hkp:
 
 
     # step 3)
-    def suppress_minimal_moles(self, Ms : list,method,size1_mole): # suppress with method (mm/il,mm,1/il)
+    def suppress_minimal_moles(self, Ms : list,method,size1_mole):  # suppress with method (mm/il,mm,1/il)
         self.create_MM(Ms)
         self.create_IL()
         logging.debug("initial IL "+str(self.IL))
@@ -162,28 +150,23 @@ class anon_hkp:
         # create mole tree
         tree = mole_tree.MoleTree(0, Ms, "null", 0, None)  # root
         tree.build_tree(self.MM)
-        logging.debug("initial mole tree: ")
-        #tree.print_tree()  # TODO: stampare albero con logging
         supp_item = tree.suppress_moles(self.MM, self.IL,method)
         logging.debug("supp_item: "+str(supp_item))
-        #sn = self.get_distorsion(supp_item,size1_mole)
         self.df.drop(inplace=True, columns=list(supp_item), axis=1)  # eliminate the items
         return supp_item  # deleted items
-    
+
+
     def suppress_rmall(self):
         supp_item = set(self.public)  # we suppress all public items, so supp_item == public
-        #sn = self.get_distorsion(supp_item,[])
         self.df.drop(inplace=True, columns=list(supp_item), axis=1)  # eliminate the items
         return supp_item  # deleted items
+
 
 def get_distorsion(anon,supp_item,size1_mole):
     supp_item.update(size1_mole)
     # anon = anon_hkp(df, sensitive, h, k, p, l)
     # we need to build stat like this because we need the original dataframe unchanged
-    stat = anon_hkp(anon.start_df, anon.sensitive, anon.h, anon.k, anon.p, anon.l ) 
-    #print("supp_item: ",supp_item)
-    #print("stat col:",stat.df.columns)
-    #print("public: ", stat.public)
+    stat = anon_hkp(anon.start_df, anon.sensitive, anon.h, anon.k, anon.p, anon.l )
     S = sum([stat.sup([i]) for i in supp_item]) # total information loss: number of '1' in the suppressed columns
     N = sum([stat.sup([i]) for i in stat.df.columns]) # total information: number of '1' in all database
     return S/N
@@ -200,7 +183,7 @@ def main():
     parser.add_argument("-L", type=int, default=3, help="early stop(?)")
     parser.add_argument('-s', '--sensitive', default=[3, 4], nargs='+', help='List of sensitive items')
     parser.add_argument('--delta', type=int, help='Percentage of public items')
-    parser.add_argument('--seed', type=int, default=420, help='Seed used for selecting private item')
+    parser.add_argument('--seed', type=int, default=42, help='Seed used for selecting private item')
 
     parser.add_argument("-rmt", help="select the removing method",type=str,choices={"rmall", "mmil","mm","1il"},default="mmil")
     parser.add_argument("-df", help="Dataset to anonymize", default="datasets/test_mole3.csv")
@@ -216,31 +199,25 @@ def main():
         logging.basicConfig(format='[\x1b[31;1m%(levelname)s\033[0m] %(asctime)s.%(msecs)03d \t %(message)s',datefmt='%H:%M:%S', stream=sys.stderr, level=logging.INFO)
 
 
-    # import dataset
-    # filename = "datasets/dataBMS1_transaction.csv"
-    # filename = "datasets/test.csv"
     filename = args.df
     h = args.H
     k = args.K
     p = args.P
     l = args.L
     df = pd.read_csv(filename)
-    # reshape df
-    #val1 = [i for i in range(20, df.shape[1])]
-    #df.drop(df.columns[val1], inplace=True, axis=1)
+
     # add indexes
     df.columns = [i for i in range(len(df.columns))]
 
     sensitive = [int(s) for s in args.sensitive]
 
-    if args.delta:
-        
+    if args.delta:  # if not selected, takes from args
         # random sampling delta percent of public items
         k = (len(df.columns) * (100 - args.delta)) // 100
         random.seed(args.seed)
         sensitive = random.sample(range(len(df.columns)), int(k))
-        #print("sensitive: ",sensitive)
         '''
+        # Select only from a subset of items: for bad distributed datasets
         temp_anon = anon_hkp(df, df.columns, h, k, p, l)
         temp = [i for i in df.columns if temp_anon.sup([i]) < 300]  # take only items with limited sup
         k = (len(df.columns) * (100 - args.delta)) // 100  # number of public items
@@ -250,26 +227,23 @@ def main():
         else:
             sensitive = temp  # we have enough (or less) sensitive items
         '''
-    #print("sensitive: ", sensitive)
+
     anon = anon_hkp(df, sensitive, h, k, p, l)
-    #print("public: ",anon.public)
-    #print("sensitive sups: " + str([anon.sup([s]) for s in sensitive]))
-    if args.preprocess: # create the preprocessed file and exit
+
+    if args.preprocess:  # Utility: create the preprocessed file and exit
         logging.info("Creating the preprocessed dataset")
         rows = anon.df.shape[0]
         to_remove = [i for i in anon.df.columns if anon.sup([i])/rows < 0.001]
-        #print(to_remove)
         anon.df.drop(anon.df.columns[to_remove], inplace=True, axis=1)
         anon.df.to_csv(args.preprocess, header=False, index=False)
-        
         logging.info("Done.")
         exit()
 
-
+    logging.debug("Initial dataset:\n"+str(df))
     # suppressing size 1 moles
     logging.info("start suppressing size 1 moles")
     size1_mole = []
-    if args.rmt != "rmall": # if we are using rmall, we need to keep all item untill we compute the distorsion
+    if args.rmt != "rmall":  # if we are using rmall, we need to keep all item untill we compute the distorsion
         size1_mole = anon.suppress_size1_mole()
     logging.info("end suppressing size 1 moles")
     # find minimal moles
@@ -277,9 +251,7 @@ def main():
     if args.rmt != "rmall": # if we are using rmall we dont need to search moles
         Ms = anon.find_minimal_moles()
     logging.info("end finding minimal moles")
-    # print("Minimal moles to suppress: ",Ms)
-    logging.info("start suppressing mole")
-
+    logging.info("start suppressing moles")
     supp_item = []
     if args.rmt == "mmil":
         supp_item = anon.suppress_minimal_moles(Ms,"mmil",size1_mole)
@@ -292,14 +264,14 @@ def main():
     else:
         raise ValueError('Suppressing method not recognised')
 
-    if args.stat:
+    if args.stat:  # Utility: statistics visualization
         sn = get_distorsion(anon,supp_item,size1_mole)
         f = open(args.stat, "a")
         f.write(f"{str(sn)}\n")
 
     logging.info("end suppressing mole")
     anon_df = anon.df
-    #print(anon_df)
+    logging.debug("Anonymized dataset:\n"+str(anon_df))
     # put anonimized df in a csv
     anon_df.to_csv(args.output)
 

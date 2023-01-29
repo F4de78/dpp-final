@@ -1,4 +1,3 @@
-import copy
 
 # sort all tuples (moles) in Ms considering values of MM(e)
 def sort_tuple(Ms, MM):
@@ -17,7 +16,7 @@ class ScoreList:
     def __init__(self,MM_value,IL_value,link):
         self.MM = MM_value
         self.IL = IL_value
-        self.node_link = link # replace linking all nodes in tree
+        self.node_link = link  # replace linking all nodes in tree
 
 class MoleTree:
     def __init__(self, level, Ms, label, mole_num: int, father):
@@ -27,7 +26,7 @@ class MoleTree:
         self.father = father
         self.label = label
         self.mole_num = mole_num
-        #self.node_link = node_link #replaced by a list of nodes in score table
+        #self.node_link = node_link    # replaced by a list of nodes in score table
         
     def print_tree(self):
         print("  " * self.level, self.label,":",self.mole_num)
@@ -46,16 +45,13 @@ class MoleTree:
                             child.mole_num += 1
                 else:  # add new child node
                     # create Ms for the child
-                    #new_Ms = [mtuple for mtuple in self.Ms if mole[self.level] == new_label]
                     new_Ms = []
                     for mtuple in self.Ms:
                         if mtuple[self.level] == new_label:
                             new_Ms.append(mtuple)
-                    #print("child label: ", new_label, ", level ", self.level, " child Ms list ", new_Ms)
                     # create child node
                     new_child = MoleTree(self.level+1, new_Ms, new_label, 1, self)
                     self.children.append(new_child)
-                    #new_child.build_tree(MM)  # recursion by rami
         # recursion by levels
         for child in self.children:
             child.build_tree(MM)  # recursion
@@ -68,7 +64,7 @@ class MoleTree:
             node = node.father
         return ancestors
 
-    def build_link(self,label,ret:list):
+    def build_link(self,label, ret:list):
         for child in self.children:
             if child.label == label:
                 ret.append(child)
@@ -83,11 +79,6 @@ class MoleTree:
             l = []
             self.build_link(label,l)
             score_table[label] = ScoreList(MM[label],IL[label],l)
-        #TODO: da stamapre con logging
-        #print("score table: ")
-        #print("label MM IL link")
-        #for label,score in score_table.items():
-        #    print(label, " ", score.MM, " " ,score.IL, " ", [i.label for i in score.node_link])
         return score_table
 
     # remove the subtree having 'self' as root, the root and his link in score table
@@ -102,21 +93,24 @@ class MoleTree:
             for ancestor in self.get_ancestors(): # update ancestors of root
                 ancestor.mole_num -= self.mole_num
                 score_table[ancestor.label].MM -= self.mole_num
-                #we probably need to update IL 
             self.father.children.remove(self) # remove root
         score_table[self.label].MM -= self.mole_num
-        del self # ?
+        del self
 
-    def suppress_moles(self,MM,IL,method): # method param change how we select the element to remove
+    def suppress_moles(self,MM,IL,method):  # method param change how we select the element to remove
         score_table = self.build_score_table(MM,IL)
-        #TODO: da stamapre con logging
-        #print("initial score table:")
-        #for label,score in score_table.items():
-        #    print(label, " ", score.MM, " " ,score.IL, " ", [i.label for i in score.node_link])
+
+        # TODO: da stamapre con logging
+        print("tree:")
+        self.print_tree()
+        print("\nscore table:")
+        print("item  MM  IL  node_links")
+        for label, score in score_table.items():
+            print(label, "   ", score.MM, " ", score.IL, " ", [i.label for i in score.node_link])
+
         supp_item = set()
         keys = list(score_table)
         while keys:  # while score table is not empty
-            #print("keys",keys)
             score = []
             if method == "mmil":
                 for _,e in score_table.items():
@@ -131,10 +125,9 @@ class MoleTree:
                 raise ValueError('Suppressing method not recognised')
 
             e = keys[score.index(max(score))]
-            print("to remove: ", e)
+            print("\nto remove (max MM/IL): ", e, "\n")
             #TODO: da stamapre con logging
-            #print("To delete: ", e)
-            supp_item.add(e) # select the label with the max value of MM/IL
+            supp_item.add(e)  # select the label with the max value of MM/IL
             for link in score_table[e].node_link:
                 link.remove_subtree(link.label,score_table)
             score_table[e].node_link.clear()
@@ -149,7 +142,6 @@ class MoleTree:
                     keys.remove(k)
             #TODO: da stamapre con logging
             print("-------------------")
-            print("to remove: ", e)
             print("tree:")
             self.print_tree()
             print("score table:")
