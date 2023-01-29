@@ -34,7 +34,7 @@ class MoleTree:
             child.print_tree()
 
     # build the subtree from the node (recursive)
-    def build_tree(self, MM):
+    def build_tree(self):
         for mole in self.Ms:
             # add children to the node based on level element
             if self.level != len(mole):  # exit recursion: we reached a leaf
@@ -54,7 +54,7 @@ class MoleTree:
                     self.children.append(new_child)
         # recursion by levels
         for child in self.children:
-            child.build_tree(MM)  # recursion
+            child.build_tree()  # recursion
 
     def get_ancestors(self):
         ancestors = []

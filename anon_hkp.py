@@ -149,7 +149,7 @@ class anon_hkp:
         logging.debug("sorted Ms: "+str(Ms))
         # create mole tree
         tree = mole_tree.MoleTree(0, Ms, "null", 0, None)  # root
-        tree.build_tree(self.MM)
+        tree.build_tree()
         supp_item = tree.suppress_moles(self.MM, self.IL,method)
         logging.debug("supp_item: "+str(supp_item))
         self.df.drop(inplace=True, columns=list(supp_item), axis=1)  # eliminate the items
